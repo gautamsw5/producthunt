@@ -21,9 +21,9 @@ def create(request : WSGIRequest):
             product.image = request.FILES['image']
             product.pub_date = timezone.datetime.now()
             product.votes_total = 1
-            product.voters.add(request.user)
             product.hunter = request.user
             product.save()
+            product.voters.add(request.user)
             return redirect('/product/'+str(product.id))
         else:
             return render(request, 'product/create.html', {"error":"All feilds are required"})
@@ -32,35 +32,37 @@ def create(request : WSGIRequest):
 
 def detail(request : WSGIRequest, product_id):
     product = get_object_or_404(Product, pk=product_id)
-    return render(request, 'product/detail.html', {'product':product})
+    return render(request, 'product/detail.html', {'product':product, 'user':request.user})
 
 @login_required(login_url="/accounts/signup")
 def upvote(request : WSGIRequest, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=product_id)
-        if request.user in product.voters:
+        if request.user in product.voters.all():
             product.voters.remove(request.user)
+            product.votes_total -= 1
         else:
             product.voters.add(request.user)
-        product.votes_total = len(product.voters)
+            product.votes_total += 1
         product.save()
         return redirect('/product/'+str(product.id))
     return redirect('')
 
-@login_required(login_url="/accounts/signup")
-def upvote_home(request : WSGIRequest, product_id):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, pk=product_id)
-        if request.user in product.voters:
-            product.voters.remove(request.user)
-        else:
-            product.voters.add(request.user)
-        product.votes_total = len(product.voters)
-        product.save()
-        products = Product.objects
-        return render(request, 'product/home.html', {'products':products})
-    return redirect('')
 
 def home(request : WSGIRequest):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            product_id = int(request.POST["product_id"])
+            product = get_object_or_404(Product, pk=product_id)
+            if request.user in product.voters.all():
+                product.voters.remove(request.user)
+                product.votes_total -= 1
+            else:
+                product.voters.add(request.user)
+                product.votes_total += 1
+            product.save()
+            products = Product.objects
+        else:
+            return render(request, 'accounts/signup.html')
     products = Product.objects
-    return render(request, 'product/home.html', {'products':products})
+    return render(request, 'product/home.html', {'products':products, 'user':request.user})

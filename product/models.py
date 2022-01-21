@@ -15,8 +15,8 @@ class Product(models.Model):
     image = models.ImageField(upload_to='images/', default="")
     icon = models.ImageField(upload_to='images/', default="")
     votes_total = models.IntegerField(default=1)
-    voters = set()
-    hunter = models.ForeignKey(User, on_delete=models.CASCADE, default="")
+    voters = models.ManyToManyField(User, default="")
+    hunter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="voters", default="")
     
     def __str__(self) -> str:  # On admin page, object name will be showed as title
         return self.title

@@ -14,7 +14,11 @@
         <img src="{{ product.icon.url }}" class="img-fluid"/>
     </div>
     <div class="col-4">
+        {% if user in product.voters.all %}
+        <a href="javascript:{document.getElementById('upvote').submit()}"><button class="btn btn-success btn-lg btn-block"><span class="oi oi-caret-top"></span> Upvote {{product.votes_total}}</button></a>
+        {% else %}
         <a href="javascript:{document.getElementById('upvote').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> Upvote {{product.votes_total}}</button></a>
+        {% endif %}
     </div>
 </div>
 <div class="row pt-3">

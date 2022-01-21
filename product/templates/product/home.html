@@ -10,11 +10,15 @@
         <p>{{ product.summary }}</p>
     </div>
     <div class="col-4">
-        <a href="javascript:{document.getElementById('upvote_home{{product.id}}').submit();}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span>Upvote {{product.votes_total}}</button></a>
+        {% if user in product.voters.all %}
+        <a href="javascript:{document.getElementById('upvote_home{{product.id}}').submit()}"><button class="btn btn-success btn-lg btn-block"><span class="oi oi-caret-top"></span> Upvote {{product.votes_total}}</button></a>
+        {% else %}
+        <a href="javascript:{document.getElementById('upvote_home{{product.id}}').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> Upvote {{product.votes_total}}</button></a>
+        {% endif %}
     </div>
-    <form id="upvote_home{{product.id}}" method="POST" action="{% url 'upvote_home' product.id %}">
+    <form id="upvote_home{{product.id}}" method="POST" action="{% url 'home' %}">
         {% csrf_token %}
-        <input type="hidden"/>
+        <input type="hidden" name="product_id" value="{{product.id}}"/>
     </form>
 </div>
 {% endfor %}
